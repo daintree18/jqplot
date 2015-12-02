@@ -266,7 +266,7 @@
         return td;
     };
     
-    $.jqplot.DonutRenderer.prototype.drawSlice = function (ctx, ang1, ang2, color, isShadow) {
+    $.jqplot.DonutRenderer.prototype.drawSlice = function (ctx, ang1, ang2, color, isShadow, index) {
         var r = this._diameter / 2;
         var ri = r - this._thickness;
         var fill = this.fill;
@@ -279,44 +279,62 @@
             for (var i=0; i<this.shadowDepth; i++) {
                 ctx.save();
                 ctx.translate(this.shadowOffset*Math.cos(this.shadowAngle/180*Math.PI), this.shadowOffset*Math.sin(this.shadowAngle/180*Math.PI));
-                doDraw();
+                doDraw(, ang2, color);
             }
         }
         
         else {
-            doDraw();
+		 // Draw slices
+		  var data = this._plotData[index];
+		  if (data)
+		  {
+			console.info(data[0] + ', ' + data[3]);
+				doDraw(ang1, ang2, data[3] ? '#80b3ff' : color);
+			$.each(data[5], function (i, slice)
+			{
+			  var percent = (ang2 - ang1) / (60 * 24);
+			  doDraw (ang1 + slice.start * percent, ang1 + slice.end * percent, '#80b3ff');
+			});
+		  }
+		  else
+		  {
+			doDraw(ang1, ang2, color);
+		  }
         }
         
-        function doDraw () {
-            // Fix for IE and Chrome that can't seem to draw circles correctly.
-            // ang2 should always be <= 2 pi since that is the way the data is converted.
-             if (ang2 > 6.282 + this.startAngle) {
-                ang2 = 6.282 + this.startAngle;
-                if (ang1 > ang2) {
-                    ang1 = 6.281 + this.startAngle;
-                }
-            }
-            // Fix for IE, where it can't seem to handle 0 degree angles.  Also avoids
-            // ugly line on unfilled donuts.
-            if (ang1 >= ang2) {
-                return;
-            }
-            ctx.beginPath();  
-            ctx.fillStyle = color;
-            ctx.strokeStyle = color;
-            // ctx.lineWidth = lineWidth;
-            ctx.arc(0, 0, r, ang1, ang2, false);
-            ctx.lineTo(ri*Math.cos(ang2), ri*Math.sin(ang2));
-            ctx.arc(0,0, ri, ang2, ang1, true);
-            ctx.closePath();
-            if (fill) {
-                ctx.fill();
-            }
-            else {
-                ctx.stroke();
-            }
-        }
         
+        function doDraw (a1, a2, col)
+	  {
+		// Fix for IE and Chrome that can't seem to draw circles correctly.
+		// ang2 should always be <= 2 pi since that is the way the data is converted.
+		if (a2 > 6.282 + this.startAngle) {
+		  a2 = 6.282 + this.startAngle;
+		  if (a1 > a2) {
+			a1 = 6.281 + this.startAngle;
+		  }
+		}
+		// Fix for IE, where it can't seem to handle 0 degree angles.  Also avoids
+		// ugly line on unfilled donuts.
+		if (a1 >= a2)
+		{
+		  return;
+		}
+		ctx.beginPath();  
+		ctx.fillStyle = col;
+		ctx.strokeStyle = col;
+		// ctx.lineWidth = lineWidth;
+		ctx.arc(0, 0, r, a1, a2, false);
+		ctx.lineTo(ri*Math.cos(a2), ri*Math.sin(a2));
+		ctx.arc(0,0, ri, a2, a1, true);
+		ctx.closePath();
+		if (fill) {
+		  ctx.fill();
+		}
+		else {
+		  ctx.stroke();
+		}
+	  }
+
         if (isShadow) {
             for (var i=0; i<this.shadowDepth; i++) {
                 ctx.restore();
@@ -405,7 +423,7 @@
                 var ang1 = (i == 0) ? sa : gd[i-1][1] + sa;
                 // Adjust ang1 and ang2 for sliceMargin
                 ang1 += this.sliceMargin/180*Math.PI;
-                this.renderer.drawSlice.call (this, ctx, ang1, gd[i][1]+sa, shadowColor, true);
+                this.renderer.drawSlice.call (this, ctx, ang1, gd[i][1]+sa, shadowColor, true, i);
             }
             
         }
@@ -415,7 +433,7 @@
             ang1 += this.sliceMargin/180*Math.PI;
             var ang2 = gd[i][1] + sa;
             this._sliceAngles.push([ang1, ang2]);
-            this.renderer.drawSlice.call (this, ctx, ang1, ang2, this.seriesColors[i], false);
+            this.renderer.drawSlice.call (this, ctx, ang1, ang2, this.seriesColors[i], false, i);
             
             if (this.showDataLabels && gd[i][2]*100 >= this.dataLabelThreshold) {
                 var fstr, avgang = (ang1+ang2)/2, label;
@@ -681,7 +699,7 @@
         canvas._ctx.clearRect(0,0,canvas._ctx.canvas.width, canvas._ctx.canvas.height);
         s._highlightedPoint = pidx;
         plot.plugins.donutRenderer.highlightedSeriesIndex = sidx;
-        s.renderer.drawSlice.call(s, canvas._ctx, s._sliceAngles[pidx][0], s._sliceAngles[pidx][1], s.highlightColors[pidx], false);
+        s.renderer.drawSlice.call(s, canvas._ctx, s._sliceAngles[pidx][0], s._sliceAngles[pidx][1], s.highlightColors[pidx], false, pidx);
     }
     
     function unhighlight (plot) {
