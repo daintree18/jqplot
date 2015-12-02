@@ -279,7 +279,7 @@
             for (var i=0; i<this.shadowDepth; i++) {
                 ctx.save();
                 ctx.translate(this.shadowOffset*Math.cos(this.shadowAngle/180*Math.PI), this.shadowOffset*Math.sin(this.shadowAngle/180*Math.PI));
-                doDraw(, ang2, color);
+                doDraw(ang1, ang2, color);
             }
         }
         
