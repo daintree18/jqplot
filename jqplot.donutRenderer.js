@@ -204,6 +204,7 @@
         plot.eventListenerHooks.addOnce('jqplotMouseUp', handleMouseUp);
         plot.eventListenerHooks.addOnce('jqplotClick', handleClick);
         plot.eventListenerHooks.addOnce('jqplotRightClick', handleRightClick);
+		plot.eventListenerHooks.addOnceh('jqplotDblClick', handleDblClick);
         plot.postDrawHooks.addOnce(postPlotDraw);
         
         
@@ -780,7 +781,14 @@
             evt.pageY = ev.pageY;
             plot.target.trigger(evt, ins);
         }
-    }    
+    }   
+
+     function handleDblClick (ev, gridpos, datapos, neighbor, plot) {
+		console.info('dblclick!!');
+        ev.preventDefault();
+        ev.stopImmediatePropagation();
+        return false;
+    }
     
     // called within context of plot
     // create a canvas which we can draw on.
