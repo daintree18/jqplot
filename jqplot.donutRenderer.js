@@ -282,7 +282,6 @@
                 doDraw(ang1, ang2, color);
             }
         }
-        
         else {
 		 // Draw slices
 		  var data = this._plotData[index];
