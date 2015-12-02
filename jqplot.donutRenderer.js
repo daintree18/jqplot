@@ -204,7 +204,7 @@
         plot.eventListenerHooks.addOnce('jqplotMouseUp', handleMouseUp);
         plot.eventListenerHooks.addOnce('jqplotClick', handleClick);
         plot.eventListenerHooks.addOnce('jqplotRightClick', handleRightClick);
-		plot.eventListenerHooks.addOnceh('jqplotDblClick', handleDblClick);
+		plot.eventListenerHooks.addOnce('jqplotDblClick', handleDblClick);
         plot.postDrawHooks.addOnce(postPlotDraw);
         
         
